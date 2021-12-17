@@ -49,9 +49,9 @@ To send your data to the stream, you can use `Artisan::call` method to call `str
 
 ```php
 ...
-		Artisan::call('stream:add', [
-			$stream,
-			...$fieldsAndValues // with format "field:value"
-		])
+	Artisan::call('stream:add', [
+		$stream,
+		...$fieldsAndValues // with format "field:value"
+	])
 ...
 ```
