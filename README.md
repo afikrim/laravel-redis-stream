@@ -2,6 +2,8 @@
 
 Use redis stream as your message broker in laravel.
 
+![demo-gif](demo.gif)
+
 ### Installation
 
 Install it by using,
