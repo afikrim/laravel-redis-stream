@@ -1,0 +1,36 @@
+{
+    "name": "afikrim/laravel-redis-stream",
+    "description": "A composer library to use redis stream as a message broker in laravel",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Aziz Fikri M",
+            "email": "afikrim10@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.3|^8.0",
+        "illuminate/redis": "^8.0",
+        "predis/predis": "2.0.x-dev",
+        "illuminate/console": "^8.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Afikrim\\LaravelRedisStream\\": "src/"
+        }
+    },
+    "suggest": {
+        "ext-redis": "Required to use redis above 5.0.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Afikrim\\LaravelRedisStream\\LaravelRedisStreamServiceProvider"
+            ]
+        }
+    }
+}
