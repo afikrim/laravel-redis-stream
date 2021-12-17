@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\Stream;
+namespace Afikrim\LaravelRedisStream\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
