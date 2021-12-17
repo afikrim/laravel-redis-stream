@@ -92,12 +92,22 @@ class ConsumeCommand extends Command
 
     protected function getGroup()
     {
-        return env('STREAM_GROUP', Str::slug(env('APP_ENV', 'local') . '_' . env('APP_NAME', 'laravel') . '_group', '_'));
+        return env('STREAM_GROUP', Str::slug(
+            $this->laravel->config->get('app.env')
+            . '_'
+            . $this->laravel->config->get('app.name')
+            . '_group'
+            , '_'));
     }
 
     protected function getConsumer()
     {
-        return env('STREAM_CONSUMER', Str::slug(env('APP_ENV', 'local') . '_' . env('APP_NAME', 'laravel') . '_consumer', '_'));
+        return env('STREAM_GROUP', Str::slug(
+            $this->laravel->config->get('app.env')
+            . '_'
+            . $this->laravel->config->get('app.name')
+            . '_consumer'
+            , '_'));
     }
 
     private function readStream()
