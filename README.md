@@ -13,9 +13,9 @@ composer require afikrim/laravel-redis-stream
 After you install the package, register a new service provider in `bootstrap/app.php`
 
 ```php
-# Register RedisServiceProvider to available facades for redis
+// Register RedisServiceProvider to available facades for redis
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
-# Register LaravelRedisServiceProvider to enable redis stream console commands
+// Register LaravelRedisServiceProvider to enable redis stream console commands
 $app->register(\Afikrim\LaravelRedisStream\LaravelRedisStreamServiceProvider::class);
 ```
 
