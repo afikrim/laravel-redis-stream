@@ -26,10 +26,12 @@ class ConsumeCommand extends Command
 
         try {
             // create consumer group
-            Artisan::call('stream:declare-group', [
-                'key' => $this->argument('key'),
-                'group' => $this->getGroup(),
-            ]);
+            foreach ($this->argument('key') as $key) {
+                Artisan::call('stream:declare-group', [
+                    'key' => $key,
+                    'group' => $this->getGroup(),
+                ]);
+            }
         } catch (\Exception$e) {
             // do nothing
         }
