@@ -22,11 +22,10 @@ class ConsumeCommand extends Command
 
     protected $description = 'Destroy an object from the stream';
 
-    public function handle(): void
+    public function handle()
     {
         if (!$this->hasArgument('key')) {
-            echo "Key params cannot be null.";
-            return;
+            return 1;
         }
 
         foreach ($this->argument('key') as $key) {
@@ -45,7 +44,6 @@ class ConsumeCommand extends Command
                 // do nothing
             }
         }
-
         while (true) {
             $data = RedisStream::xreadgroup(
                 $this->getGroup(),
@@ -64,6 +62,9 @@ class ConsumeCommand extends Command
                 ]
             );
             if (count($data) === 0) {
+                if (config('app.env', 'development') === 'testing') {
+                    break;
+                }
                 continue;
             }
 
@@ -80,13 +81,15 @@ class ConsumeCommand extends Command
                     RedisStream::xack(
                         $key,
                         $this->getGroup(),
-                        [$key['id']]
+                        [$single2['id']]
                     );
                 }
             }
 
             $this->rest();
         }
+
+        return 0;
     }
 
     protected function processData($key, array $data)

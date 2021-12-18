@@ -17,11 +17,10 @@ class DeclareGroupCommand extends Command
 
     protected $description = 'Declare a stream group';
 
-    public function handle(): void
+    public function handle()
     {
         if (!$this->hasArgument('key')) {
-            echo "Key params cannot be null.";
-            return;
+            return 1;
         }
 
         RedisStream::xgroup(
@@ -34,7 +33,7 @@ class DeclareGroupCommand extends Command
             ]
         );
 
-        echo "Group {$this->getGroup()} successfuly created in {$this->argument('key')}.";
+        return 0;
     }
 
     protected function getGroup()

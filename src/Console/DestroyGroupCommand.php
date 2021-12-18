@@ -15,11 +15,10 @@ class DestroyGroupCommand extends Command
 
     protected $description = 'Destroy a stream group';
 
-    public function handle(): void
+    public function handle()
     {
         if (!$this->hasArgument('key')) {
-            echo "Key params cannot be null.";
-            return;
+            return 1;
         }
 
         RedisStream::xgroup(
@@ -28,7 +27,7 @@ class DestroyGroupCommand extends Command
             $this->getGroup(),
         );
 
-        echo "Group {$this->getGroup()} successfuly destroyed in {$this->argument('key')}.";
+        return 0;
     }
 
     protected function getGroup()
