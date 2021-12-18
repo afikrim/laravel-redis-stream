@@ -15,11 +15,14 @@ class DestroyGroupCommand extends Command
 
     protected $description = 'Destroy a stream group';
 
-    private $redisStream;
-
-    public function __construct(RedisStream $redisStream)
+    /**
+     * Create new command instances
+     *
+     * @return void
+     */
+    public function __construct()
     {
-        $this->redisStream = $redisStream;
+        // do nothing
     }
 
     public function handle(): void
@@ -29,12 +32,11 @@ class DestroyGroupCommand extends Command
             return;
         }
 
-        $this->redisStream
-            ->xgroup(
-                XGROUPOptions::OPTION_DESTROY,
-                $this->argument('key'),
-                $this->getGroup(),
-            );
+        RedisStream::xgroup(
+            XGROUPOptions::OPTION_DESTROY,
+            $this->argument('key'),
+            $this->getGroup(),
+        );
 
         echo "Group {$this->getGroup()} successfuly destroyed in {$this->argument('key')}.";
     }

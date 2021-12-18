@@ -21,11 +21,14 @@ class ConsumeCommand extends Command
 
     protected $description = 'Destroy an object from the stream';
 
-    private $redisStream;
-
-    public function __construct(RedisStream $redisStream)
+    /**
+     * Create new command instances
+     *
+     * @return void
+     */
+    public function __construct()
     {
-        $this->redisStream = $redisStream;
+        // do nothing
     }
 
     public function handle(): void
@@ -38,57 +41,54 @@ class ConsumeCommand extends Command
         foreach ($this->argument('key') as $key) {
             try {
                 // create consumer group
-                $this->redisStream
-                    ->xgroup(
-                        XGROUPOptions::OPTION_CREATE,
-                        $key,
-                        $this->getGroup(),
-                        $this->option('mkstream'),
-                        [
-                            '$',
-                        ]
-                    );
+                RedisStream::xgroup(
+                    XGROUPOptions::OPTION_CREATE,
+                    $key,
+                    $this->getGroup(),
+                    $this->option('mkstream'),
+                    [
+                        '$',
+                    ]
+                );
             } catch (\Exception$e) {
                 // do nothing
             }
         }
 
         while (true) {
-            $data = $this->redisStream
-                ->xreadgroup(
-                    $this->getGroup(),
-                    $this->getConsumer(),
-                    $this->argument('key'),
-                    collect($this->argument('key'))
-                        ->map(function () {
-                            return '>';
-                        })
-                        ->toArray(),
-                    [
-                        Options::OPTION_COUNT,
-                        $this->option('count'),
-                        Options::OPTION_BLOCK,
-                        $this->option('block'),
-                    ]
-                );
+            $data = RedisStream::xreadgroup(
+                $this->getGroup(),
+                $this->getConsumer(),
+                $this->argument('key'),
+                collect($this->argument('key'))
+                    ->map(function () {
+                        return '>';
+                    })
+                    ->toArray(),
+                [
+                    Options::OPTION_COUNT,
+                    $this->option('count'),
+                    Options::OPTION_BLOCK,
+                    $this->option('block'),
+                ]
+            );
             if (count($data) === 0) {
                 continue;
             }
 
-            $data->each(function ($d) {
-                ['key' => $key, 'data' => $data] = $d;
+            foreach ($data as $single) {
+                ['key' => $key, 'data' => $data2] = $single;
 
-                $data->each(function ($data) use ($key) {
-                    $this->processData($key, $data);
+                foreach ($data2 as $single2) {
+                    $this->processData($key, $single2);
 
-                    $this->redisStream
-                        ->xack(
-                            $key,
-                            $this->getGroup(),
-                            [$key['id']]
-                        );
-                });
-            });
+                    RedisStream::xack(
+                        $key,
+                        $this->getGroup(),
+                        [$key['id']]
+                    );
+                }
+            }
 
             $this->rest();
         }
