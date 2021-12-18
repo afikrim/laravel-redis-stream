@@ -11,8 +11,11 @@
     "minimum-stability": "dev",
     "require": {
         "php": "^7.3|^8.0",
-        "illuminate/redis": "^8.0",
-        "illuminate/console": "^8.0"
+        "illuminate/redis": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.3",
+        "predis/predis": "v1.1.9"
     },
     "autoload": {
         "psr-4": {
@@ -31,5 +34,8 @@
                 "Afikrim\\LaravelRedisStream\\LaravelRedisStreamServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "test:unit": "@php vendor/bin/phpunit"
     }
 }
