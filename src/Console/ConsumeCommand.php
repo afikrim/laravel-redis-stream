@@ -6,6 +6,7 @@ use Afikrim\LaravelRedisStream\Data\Options;
 use Afikrim\LaravelRedisStream\Data\XGROUPOptions;
 use Afikrim\LaravelRedisStream\RedisStream;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ConsumeCommand extends Command
@@ -21,77 +22,74 @@ class ConsumeCommand extends Command
 
     protected $description = 'Destroy an object from the stream';
 
-    private $redisStream;
-
-    public function __construct(RedisStream $redisStream)
-    {
-        $this->redisStream = $redisStream;
-    }
-
-    public function handle(): void
+    public function handle()
     {
         if (!$this->hasArgument('key')) {
-            echo "Key params cannot be null.";
-            return;
+            return 1;
         }
 
         foreach ($this->argument('key') as $key) {
             try {
                 // create consumer group
-                $this->redisStream
-                    ->xgroup(
-                        XGROUPOptions::OPTION_CREATE,
-                        $key,
-                        $this->getGroup(),
-                        $this->option('mkstream'),
-                        [
-                            '$',
-                        ]
-                    );
+                RedisStream::xgroup(
+                    XGROUPOptions::OPTION_CREATE,
+                    $key,
+                    $this->getGroup(),
+                    $this->option('mkstream'),
+                    [
+                        '$',
+                    ]
+                );
             } catch (\Exception$e) {
                 // do nothing
             }
         }
-
         while (true) {
-            $data = $this->redisStream
-                ->xreadgroup(
-                    $this->getGroup(),
-                    $this->getConsumer(),
-                    $this->argument('key'),
-                    collect($this->argument('key'))
-                        ->map(function () {
-                            return '>';
-                        })
-                        ->toArray(),
-                    [
-                        Options::OPTION_COUNT,
-                        $this->option('count'),
-                        Options::OPTION_BLOCK,
-                        $this->option('block'),
-                    ]
-                );
+            $data = RedisStream::xreadgroup(
+                $this->getGroup(),
+                $this->getConsumer(),
+                $this->argument('key'),
+                collect($this->argument('key'))
+                    ->map(function () {
+                        return '>';
+                    })
+                    ->toArray(),
+                [
+                    Options::OPTION_COUNT,
+                    $this->option('count'),
+                    Options::OPTION_BLOCK,
+                    $this->option('block'),
+                ]
+            );
             if (count($data) === 0) {
+                if (config('app.env', 'development') === 'testing') {
+                    break;
+                }
                 continue;
             }
 
-            $data->each(function ($d) {
-                ['key' => $key, 'data' => $data] = $d;
+            foreach ($data as $single) {
+                ['key' => $key, 'data' => $data2] = $single;
 
-                $data->each(function ($data) use ($key) {
-                    $this->processData($key, $data);
+                foreach ($data2 as $single2) {
+                    try {
+                        $this->processData($key, $single2);
+                    } catch (\Exception$e) {
+                        Log::critical($e->getMessage);
+                    }
 
-                    $this->redisStream
-                        ->xack(
-                            $key,
-                            $this->getGroup(),
-                            [$key['id']]
-                        );
-                });
-            });
+                    RedisStream::xack(
+                        $key,
+                        $this->getGroup(),
+                        [$single2['id']]
+                    );
+                }
+            }
 
             $this->rest();
         }
+
+        return 0;
     }
 
     protected function processData($key, array $data)

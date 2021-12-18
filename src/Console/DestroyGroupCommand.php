@@ -15,28 +15,19 @@ class DestroyGroupCommand extends Command
 
     protected $description = 'Destroy a stream group';
 
-    private $redisStream;
-
-    public function __construct(RedisStream $redisStream)
-    {
-        $this->redisStream = $redisStream;
-    }
-
-    public function handle(): void
+    public function handle()
     {
         if (!$this->hasArgument('key')) {
-            echo "Key params cannot be null.";
-            return;
+            return 1;
         }
 
-        $this->redisStream
-            ->xgroup(
-                XGROUPOptions::OPTION_DESTROY,
-                $this->argument('key'),
-                $this->getGroup(),
-            );
+        RedisStream::xgroup(
+            XGROUPOptions::OPTION_DESTROY,
+            $this->argument('key'),
+            $this->getGroup(),
+        );
 
-        echo "Group {$this->getGroup()} successfuly destroyed in {$this->argument('key')}.";
+        return 0;
     }
 
     protected function getGroup()

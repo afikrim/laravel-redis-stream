@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## ![1.0.1 (2021-12-18)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.0...1.0.1)
+
+- Modify functions in `RedisStream` to static
+- Update documentation in `README`
+- Add test cases for console commands
+- Fix Redis Execute result handler in `RedisStream`
+
 ## ![1.0.0 (2021-12-18)](https://github.com/afikrim/laravel-redis-stream/tree/1.0.0)
 
 - Add `stream:declare-group` artisan command

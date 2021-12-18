@@ -17,32 +17,23 @@ class DeclareGroupCommand extends Command
 
     protected $description = 'Declare a stream group';
 
-    private $redisStream;
-
-    public function __construct(RedisStream $redisStream)
-    {
-        $this->redisStream = $redisStream;
-    }
-
-    public function handle(): void
+    public function handle()
     {
         if (!$this->hasArgument('key')) {
-            echo "Key params cannot be null.";
-            return;
+            return 1;
         }
 
-        $this->redisStream
-            ->xgroup(
-                XGROUPOptions::OPTION_CREATE,
-                $this->argument('key'),
-                $this->getGroup(),
-                $this->option('mkstream'),
-                [
-                    '$',
-                ]
-            );
+        RedisStream::xgroup(
+            XGROUPOptions::OPTION_CREATE,
+            $this->argument('key'),
+            $this->getGroup(),
+            $this->option('mkstream'),
+            [
+                '$',
+            ]
+        );
 
-        echo "Group {$this->getGroup()} successfuly created in {$this->argument('key')}.";
+        return 0;
     }
 
     protected function getGroup()
