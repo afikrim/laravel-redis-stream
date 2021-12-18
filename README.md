@@ -2,26 +2,35 @@
 
 Use redis stream as your message broker in laravel.
 
-![demo-gif](demo.gif)
+## Installation
 
-### Installation
-
-Install it by using,
+You can install this package via composer using this command:
 
 ```sh
 composer require afikrim/laravel-redis-stream
 ```
 
-After you install the package, register a new service provider in `bootstrap/app.php`
+## Installation on Lumen
+
+After you install the package via composer, register a new service provider in `bootstrap/app.php`
 
 ```php
-// Register RedisServiceProvider to available facades for redis
-$app->register(Illuminate\Redis\RedisServiceProvider::class);
-// Register LaravelRedisServiceProvider to enable redis stream console commands
 $app->register(\Afikrim\LaravelRedisStream\LaravelRedisStreamServiceProvider::class);
 ```
 
-Then, you can add your custom consumer in `app/Console/Commands`
+> Note: don't forget to uncomment facades and register redis
+
+### Available commands
+
+There are three commands includes in this packages,
+
+1. `stream:declare-group` command to declare a group for a stream
+2. `stream:destroy-group` command to destroy a group for a stream
+3. `stream:consume` command to consume incoming event
+
+### Add custom consume handler
+
+You can add your custom consumer by extending our `ConsumeCommand` in `app/Console/Commands`
 
 ```php
 <?php
@@ -40,22 +49,37 @@ class ConsumeCommand extends BaseConsume
 	 */
 	protected function processData($key, array $data)
 	{
-		// Write your custom handler here.
+        try {
+            // Write your custom handler here.
+        } catch (\Exception $e) {
+            // do nothing
+        }
 	}
 }
 ```
 
-Then register your custom consume command in your application.
+Then add your custom `ConsumeCommand` to `App\Console\Kernel` class
 
-### How to send a data to the stream?
+```php
+protected $commands = [
+    // you other command,
+    \App\Console\Commands\ConsumeCommad::class
+]
+```
 
-To send your data to the stream, you can use `Artisan::call` method to call `stream:add` command.
+### Send data to the stream
+
+To send your data to the stream, you can use `RedisStream` class.
 
 ```php
 ...
-	Artisan::call('stream:add', [
-		$stream,
-		...$fieldsAndValues // with format "field:value"
-	])
+use Afikrim\LaravelRedisStream\RedisStream;
+
+...
+    RedisStream::xadd(
+        $key,
+        $id,
+        $data
+    );
 ...
 ```
