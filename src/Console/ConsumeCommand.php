@@ -6,6 +6,7 @@ use Afikrim\LaravelRedisStream\Data\Options;
 use Afikrim\LaravelRedisStream\Data\XGROUPOptions;
 use Afikrim\LaravelRedisStream\RedisStream;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ConsumeCommand extends Command
@@ -80,7 +81,11 @@ class ConsumeCommand extends Command
                 ['key' => $key, 'data' => $data2] = $single;
 
                 foreach ($data2 as $single2) {
-                    $this->processData($key, $single2);
+                    try {
+                        $this->processData($key, $single2);
+                    } catch (\Exception$e) {
+                        Log::critical($e->getMessage);
+                    }
 
                     RedisStream::xack(
                         $key,
