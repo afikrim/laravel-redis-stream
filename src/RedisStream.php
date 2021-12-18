@@ -111,6 +111,7 @@ class RedisStream
     public static function xdel(string $key, array $ids): void
     {
         $result = Redis::executeRaw([
+            Commands::XDEL,
             $key,
             ...$ids,
         ]);
@@ -131,6 +132,7 @@ class RedisStream
     public static function xack(string $key, string $group, array $ids): void
     {
         $result = Redis::executeRaw([
+            Commands::XACK,
             $key,
             $group,
             ...$ids,
@@ -154,6 +156,7 @@ class RedisStream
     public static function xgroup(string $option, string $key, string $groupname, bool $mkstream = false, array $arguments = []): void
     {
         $redisArguments = [
+            Commands::XGROUP,
             $option,
             $key,
             $groupname,
@@ -199,6 +202,7 @@ class RedisStream
     public function newXreadgroup(string $group, string $consumer, array $streams, array $ids, array $options): array
     {
         $redisArguments = [
+            Commands::XREADGROUP,
             Options::OPTION_GROUP,
             $group,
             $consumer,
@@ -278,6 +282,6 @@ class RedisStream
                 return [$result, ...$prev];
             }, []);
 
-        return $data;
+        return (array) $data;
     }
 }
