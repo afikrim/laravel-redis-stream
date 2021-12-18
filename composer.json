@@ -15,7 +15,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3",
-        "predis/predis": "v1.1.9"
+        "predis/predis": "v1.1.9",
+        "orchestra/testbench": "7.0.x-dev"
     },
     "autoload": {
         "psr-4": {
