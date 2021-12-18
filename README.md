@@ -45,6 +45,8 @@ class ConsumeCommand extends BaseConsume
 }
 ```
 
+Then register your custom consume command in your application.
+
 ### How to send a data to the stream?
 
 To send your data to the stream, you can use `Artisan::call` method to call `stream:add` command.
