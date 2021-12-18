@@ -52,10 +52,6 @@ class RedisStream
             ...$fieldsAndValues,
         ]);
 
-        if ($result !== 'OK') {
-            throw new \Exception($result);
-        }
-
         return $result;
     }
 
@@ -98,7 +94,7 @@ class RedisStream
             throw new \Exception($results);
         }
 
-        return $this->parseResults($results);
+        return $this->parseResults($results ?? []);
     }
 
     /**
@@ -169,7 +165,7 @@ class RedisStream
 
         $result = Redis::executeRaw($redisArguments);
 
-        if ($result !== 'OK') {
+        if ($result !== 'OK' && !preg_match('/^\d+$/', $result)) {
             throw new \Exception($result);
         }
     }
@@ -222,7 +218,7 @@ class RedisStream
             throw new \Exception($results);
         }
 
-        return $this->parseResults($results);
+        return $this->parseResults($results ?? []);
     }
 
     /**
