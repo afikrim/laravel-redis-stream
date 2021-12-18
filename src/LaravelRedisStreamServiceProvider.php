@@ -13,11 +13,14 @@ class LaravelRedisStreamServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\ConsumeCommand::class,
+            ]);
+        }
+
         $this->commands([
-            Console\AddCommand::class,
-            Console\ConsumeCommand::class,
             Console\DeclareGroupCommand::class,
-            Console\DelCommand::class,
             Console\DestroyGroupCommand::class,
         ]);
     }
