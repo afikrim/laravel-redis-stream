@@ -15,16 +15,6 @@ class DestroyGroupCommand extends Command
 
     protected $description = 'Destroy a stream group';
 
-    /**
-     * Create new command instances
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        // do nothing
-    }
-
     public function handle(): void
     {
         if (!$this->hasArgument('key')) {

@@ -22,16 +22,6 @@ class ConsumeCommand extends Command
 
     protected $description = 'Destroy an object from the stream';
 
-    /**
-     * Create new command instances
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        // do nothing
-    }
-
     public function handle(): void
     {
         if (!$this->hasArgument('key')) {

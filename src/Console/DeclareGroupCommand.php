@@ -17,16 +17,6 @@ class DeclareGroupCommand extends Command
 
     protected $description = 'Declare a stream group';
 
-    /**
-     * Create new command instances
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        // do nothing
-    }
-
     public function handle(): void
     {
         if (!$this->hasArgument('key')) {
