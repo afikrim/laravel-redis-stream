@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## ![1.0.2 (2021-12-18)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.1...1.0.2)
+
+- Fix typos
+
 ## ![1.0.1 (2021-12-18)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.0...1.0.1)
 
 - Modify functions in `RedisStream` to static
