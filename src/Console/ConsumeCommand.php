@@ -75,7 +75,7 @@ class ConsumeCommand extends Command
                     try {
                         $this->processData($key, $single2);
                     } catch (\Exception$e) {
-                        Log::critical($e->getMessage);
+                        Log::critical($e->getMessage());
                     }
 
                     RedisStream::xack(
