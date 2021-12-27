@@ -13,8 +13,8 @@ class ConsumeCommand extends Command
 {
     protected $signature = 'stream:consume
                             {key* : Specified stream key}
-                            {--group : Specified stream group}
-                            {--consumer : Specified stream group}
+                            {--group= : Specified stream group}
+                            {--consumer= : Specified stream group}
                             {--mkstream=false : Make stream of the group}
                             {--count=5 : A number of event that will retrieve}
                             {--block=2000 : Blocking timeout of reading command in milis}
@@ -100,7 +100,7 @@ class ConsumeCommand extends Command
 
     protected function getGroup()
     {
-        return $this->hasOption('group')
+        return $this->option('group') && $this->option('group') !== ''
         ? $this->option('group')
         : Str::slug(
             $this->laravel->config->get('app.env')
@@ -112,7 +112,7 @@ class ConsumeCommand extends Command
 
     protected function getConsumer()
     {
-        return $this->hasOption('consumer')
+        return $this->option('consumer') && $this->option('consumer') !== ''
         ? $this->option('consumer')
         : Str::slug(
             $this->laravel->config->get('app.env')
