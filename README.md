@@ -1,6 +1,8 @@
 # Laravel Redis Stream
 
-Use redis stream as your message broker in laravel.
+Laravel Redis Stream is a package to help you handle event streaming between different applications powered by Redis.
+
+Main concept of this package is to provide an easy way of storing new events from your application and consume it in your other applications.
 
 ## Installation
 

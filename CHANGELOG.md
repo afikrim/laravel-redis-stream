@@ -2,12 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## ![1.0.3 (2021-12-28)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.2...1.0.3)
+## ![1.0.4 (2021-12-28)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.3...1.0.4)
 
 - Add support for array
 - Add support for object
 
-## ![1.0.2 (2021-12-27)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.1...1.0.2)
+## ![1.0.3 (2021-12-27)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.2...1.0.3)
+
+- Fix group and consumer option in command
+
+## ![1.0.2 (2021-12-18)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.1...1.0.2)
 
 - Fix typos
 
