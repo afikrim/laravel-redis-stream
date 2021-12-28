@@ -282,7 +282,7 @@ class RedisStream
                         $data["{$rawData[$i]}"] = (object) $value['data'];
                         continue;
                     }
-                    $data["{$rawData[$i]}"] = (object) $value['data'];
+                    $data["{$rawData[$i]}"] = $value['data'];
                 }
 
                 return ['id' => $id, 'data' => $data];
