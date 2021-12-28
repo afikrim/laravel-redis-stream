@@ -38,7 +38,7 @@ class RedisStream
      *
      * @param string $key   The stream key
      * @param string $id    New object ID
-     * @param array $data   The data that will be input. $data doesn't support a nested array
+     * @param array $data   The data that will be input
      * @return string
      */
     public function newXadd(string $key, string $id = '*', array $data): string
@@ -232,6 +232,19 @@ class RedisStream
         $data = [];
         foreach ($raw as $field => $value) {
             $data[] = $field;
+
+            if (is_object($value)) {
+                $data[] = json_encode(['type' => 'object', 'data' => (array) $value]);
+                continue;
+            }
+            if (is_array($value)) {
+                $data[] = json_encode(['type' => 'array', 'data' => $value]);
+                continue;
+            }
+            if (preg_match("/^{(.)+}/", $value)) {
+                $data[] = json_encode(['type' => 'json', 'data' => json_decode($value)]);
+                continue;
+            }
             $data[] = $value;
         }
 
@@ -254,7 +267,22 @@ class RedisStream
 
                 $data = [];
                 for ($i = 0; $i < count($rawData); $i += 2) {
-                    $data["{$rawData[$i]}"] = $rawData[$i + 1];
+                    $value = $rawData[$i + 1];
+                    if (!preg_match("/^{(.)+}/", $value)) {
+                        $data["{$rawData[$i]}"] = $value;
+                        continue;
+                    }
+
+                    $value = json_decode($value, true);
+                    if ($value['type'] === 'json') {
+                        $data["{$rawData[$i]}"] = json_encode($value['data']);
+                        continue;
+                    }
+                    if ($value['type'] === 'object') {
+                        $data["{$rawData[$i]}"] = (object) $value['data'];
+                        continue;
+                    }
+                    $data["{$rawData[$i]}"] = (object) $value['data'];
                 }
 
                 return ['id' => $id, 'data' => $data];
