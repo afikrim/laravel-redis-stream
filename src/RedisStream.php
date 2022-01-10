@@ -45,12 +45,13 @@ class RedisStream
     {
         $fieldsAndValues = $this->parseData($data);
 
-        $result = Redis::executeRaw([
-            Commands::XADD,
-            $key,
-            $id,
-            ...$fieldsAndValues,
-        ]);
+        $result = Redis::connection('stream')
+            ->executeRaw([
+                Commands::XADD,
+                config('database.redis.stream.prefix', '') . $key,
+                $id,
+                ...$fieldsAndValues,
+            ]);
 
         return $result;
     }
@@ -82,13 +83,16 @@ class RedisStream
             Commands::XREAD,
             ...$options,
             Options::OPTION_STREAMS,
-            ...$streams,
         ];
+        foreach ($streams as $stream) {
+            $redisArguments[] = config('database.redis.stream.prefix', '') . $stream;
+        }
         foreach ($ids as $id) {
             $redisArguments[] = !$id ? '0' : $id;
         }
 
-        $results = Redis::executeRaw($redisArguments);
+        $results = Redis::connection('stream')
+            ->executeRaw($redisArguments);
 
         if (is_string($results)) {
             throw new \Exception($results);
@@ -106,11 +110,12 @@ class RedisStream
      */
     public static function xdel(string $key, array $ids): void
     {
-        $result = Redis::executeRaw([
-            Commands::XDEL,
-            $key,
-            ...$ids,
-        ]);
+        $result = Redis::connection('stream')
+            ->executeRaw([
+                Commands::XDEL,
+                config('database.redis.stream.prefix', '') . $key,
+                ...$ids,
+            ]);
 
         if (!preg_match('/^\d+$/', $result)) {
             throw new \Exception($result);
@@ -127,12 +132,13 @@ class RedisStream
      */
     public static function xack(string $key, string $group, array $ids): void
     {
-        $result = Redis::executeRaw([
-            Commands::XACK,
-            $key,
-            $group,
-            ...$ids,
-        ]);
+        $result = Redis::connection('stream')
+            ->executeRaw([
+                Commands::XACK,
+                config('database.redis.stream.prefix', '') . $key,
+                config('database.redis.stream.prefix', '') . $group,
+                ...$ids,
+            ]);
 
         if (!preg_match('/^\d+$/', $result)) {
             throw new \Exception($result);
@@ -154,8 +160,8 @@ class RedisStream
         $redisArguments = [
             Commands::XGROUP,
             $option,
-            $key,
-            $groupname,
+            config('database.redis.stream.prefix', '') . $key,
+            config('database.redis.stream.prefix', '') . $groupname,
             ...$arguments,
         ];
         if ($option === XGROUPOptions::OPTION_CREATE
@@ -163,7 +169,8 @@ class RedisStream
             $redisArguments[] = XGROUPOptions::OPTION_CREATE_OPTION_MKSTREAM;
         }
 
-        $result = Redis::executeRaw($redisArguments);
+        $result = Redis::connection('stream')
+            ->executeRaw($redisArguments);
 
         if ($result !== 'OK' && !preg_match('/^\d+$/', $result)) {
             throw new \Exception($result);
@@ -200,19 +207,20 @@ class RedisStream
         $redisArguments = [
             Commands::XREADGROUP,
             Options::OPTION_GROUP,
-            $group,
-            $consumer,
+            config('database.redis.stream.prefix', '') . $group,
+            config('database.redis.stream.prefix', '') . $consumer,
             ...$options,
             Options::OPTION_STREAMS,
         ];
         foreach ($streams as $stream) {
-            $redisArguments[] = $stream;
+            $redisArguments[] = config('database.redis.stream.prefix', '') . $stream;
         }
         foreach ($ids as $id) {
             $redisArguments[] = !$id ? '>' : $id;
         }
 
-        $results = Redis::executeRaw($redisArguments);
+        $results = Redis::connection('stream')
+            ->executeRaw($redisArguments);
 
         if (is_string($results)) {
             throw new \Exception($results);
@@ -232,19 +240,6 @@ class RedisStream
         $data = [];
         foreach ($raw as $field => $value) {
             $data[] = $field;
-
-            if (is_object($value)) {
-                $data[] = json_encode(['type' => 'object', 'data' => (array) $value]);
-                continue;
-            }
-            if (is_array($value)) {
-                $data[] = json_encode(['type' => 'array', 'data' => $value]);
-                continue;
-            }
-            if (preg_match("/^{(.)+}/", $value)) {
-                $data[] = json_encode(['type' => 'json', 'data' => json_decode($value)]);
-                continue;
-            }
             $data[] = $value;
         }
 
@@ -268,21 +263,7 @@ class RedisStream
                 $data = [];
                 for ($i = 0; $i < count($rawData); $i += 2) {
                     $value = $rawData[$i + 1];
-                    if (!preg_match("/^{(.)+}/", $value)) {
-                        $data["{$rawData[$i]}"] = $value;
-                        continue;
-                    }
-
-                    $value = json_decode($value, true);
-                    if ($value['type'] === 'json') {
-                        $data["{$rawData[$i]}"] = json_encode($value['data']);
-                        continue;
-                    }
-                    if ($value['type'] === 'object') {
-                        $data["{$rawData[$i]}"] = (object) $value['data'];
-                        continue;
-                    }
-                    $data["{$rawData[$i]}"] = $value['data'];
+                    $data["{$rawData[$i]}"] = $value;
                 }
 
                 return ['id' => $id, 'data' => $data];

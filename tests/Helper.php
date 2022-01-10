@@ -8,7 +8,8 @@ class Helper
 {
     public static function xinfo(array $arguments)
     {
-        $infosRaw = Redis::executeRaw($arguments);
+        $infosRaw = Redis::connection('stream')
+            ->executeRaw($arguments);
         $infos = collect($infosRaw)
             ->map(function ($infoRaw) {
                 $info = [];

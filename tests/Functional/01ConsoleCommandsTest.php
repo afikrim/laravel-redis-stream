@@ -2,6 +2,7 @@
 
 namespace Afikrim\LaravelRedisStream\Tests\Functional;
 
+use Afikrim\LaravelRedisStream\ClientProxy;
 use Afikrim\LaravelRedisStream\Data\XGROUPOptions;
 use Afikrim\LaravelRedisStream\RedisStream;
 use Afikrim\LaravelRedisStream\Tests\Helper;
@@ -30,9 +31,9 @@ class ConsoleCommandTest extends BaseTestCase
         $infos = Helper::xinfo([
             'XINFO',
             'GROUPS',
-            'mystream',
+            config('database.redis.stream.prefix') . 'mystream',
         ]);
-        $info = $infos->filter(function ($info) {return $info['name'] === 'mygroup';})->first();
+        $info = $infos->filter(function ($info) {return $info['name'] === config('database.redis.stream.prefix') . 'mygroup';})->first();
 
         $this->assertNotNull($info, "Group not created");
     }
@@ -63,9 +64,9 @@ class ConsoleCommandTest extends BaseTestCase
         $infos = Helper::xinfo([
             'XINFO',
             'GROUPS',
-            'mystream',
+            config('database.redis.stream.prefix') . 'mystream',
         ]);
-        $info = $infos->filter(function ($info) {return $info['name'] === 'mygroup';})->first();
+        $info = $infos->filter(function ($info) {return $info['name'] === config('database.redis.stream.prefix') . 'mygroup';})->first();
 
         $this->assertEquals(null, $info, "Group destroyed");
     }
@@ -92,28 +93,47 @@ class ConsoleCommandTest extends BaseTestCase
         } catch (\Exception$e) {}
 
         Artisan::call('stream:consume', [
-            'key' => ['mystream'],
             '--group' => 'mygroup',
+            '--count' => 10,
             '--rest' => 0,
         ]);
 
         $infos = Helper::xinfo([
             'XINFO',
             'GROUPS',
-            'mystream',
+            config('database.redis.stream.prefix') . 'mystream',
         ]);
-        $info = $infos->filter(function ($info) {return $info['name'] === 'mygroup';})->first();
+        $info = $infos->filter(function ($info) {return $info['name'] === config('database.redis.stream.prefix') . 'mygroup';})->first();
 
         $this->assertEquals(0, $info['pending'], "There is still pending event");
+    }
+
+    /** Not part of console commands */
+    public function testClient()
+    {
+        exec("/usr/bin/php " . __DIR__ . "../../artisan stream:consume --group=mygroup --count=1 --rest=0 --block=0");
+        $results = ClientProxy::init([
+            'group' => 'mygroup',
+        ])
+            ->publish('mystream2', [
+                'name' => 'Aziz',
+                'email' => "afikrim10@gmail.com",
+            ])
+            ->subscribe('mystream2', 60);
+
+        $this->assertArrayHasKey('response', $results[0], "Array doesn't have 'response' key");
     }
 
     private function populateStream()
     {
         for ($i = 0; $i < 10; $i += 1) {
-            RedisStream::xadd('mystream', '*', [
-                'name' => 'Aziz',
-                'email' => "afikrim1{$i}@gmail.com",
-            ]);
+            ClientProxy::init([
+                'group' => 'mygroup',
+            ])
+                ->dispatch('mystream', [
+                    'name' => 'Aziz',
+                    'email' => "afikrim1{$i}@gmail.com",
+                ]);
         }
     }
 }
