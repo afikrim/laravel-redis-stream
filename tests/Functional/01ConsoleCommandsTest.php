@@ -109,20 +109,20 @@ class ConsoleCommandTest extends BaseTestCase
     }
 
     /** Not part of console commands */
-    public function testClient()
-    {
-        exec("/usr/bin/php " . __DIR__ . "../../artisan stream:consume --group=mygroup --count=1 --rest=0 --block=0");
-        $results = ClientProxy::init([
-            'group' => 'mygroup',
-        ])
-            ->publish('mystream2', [
-                'name' => 'Aziz',
-                'email' => "afikrim10@gmail.com",
-            ])
-            ->subscribe('mystream2', 60);
+    // public function testClient()
+    // {
+    //     exec("/usr/bin/php " . __DIR__ . "../../artisan stream:consume --group=mygroup --count=1 --rest=0 --block=0");
+    //     $results = ClientProxy::init([
+    //         'group' => 'mygroup',
+    //     ])
+    //         ->publish('mystream2', [
+    //             'name' => 'Aziz',
+    //             'email' => "afikrim10@gmail.com",
+    //         ])
+    //         ->subscribe('mystream2', 60);
 
-        $this->assertArrayHasKey('response', $results[0], "Array doesn't have 'response' key");
-    }
+    //     $this->assertArrayHasKey('response', $results[0], "Array doesn't have 'response' key");
+    // }
 
     private function populateStream()
     {
