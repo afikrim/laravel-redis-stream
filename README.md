@@ -107,17 +107,35 @@ protected $commands = [
 
 ## Send data to the stream
 
-To send your data to the stream, you can use `RedisStream` class.
+To send your data to the stream, you can use `ClientProxy` class.
+
+### Send data and listen for the response
 
 ```php
 ...
-use Afikrim\LaravelRedisStream\RedisStream;
+use Afikrim\LaravelRedisStream\ClientProxy;
 
 ...
-    RedisStream::xadd(
-        $key,
-        $id,
-        $data
-    );
+    $results = ClientProxy::init($options)
+        ->publish('mystream2', [
+            'name' => 'Aziz',
+            'email' => "afikrim10@gmail.com",
+        ])
+        ->subscribe('mystream2', 60);
+...
+```
+
+### Send data without waiting any response
+
+```php
+...
+use Afikrim\LaravelRedisStream\ClientProxy;
+
+...
+    ClientProxy::init($options)
+        ->dispatch('mystream2', [
+            'name' => 'Aziz',
+            'email' => "afikrim10@gmail.com",
+        ]);
 ...
 ```
