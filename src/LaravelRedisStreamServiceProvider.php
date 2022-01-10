@@ -13,6 +13,11 @@ class LaravelRedisStreamServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/stream.php',
+            'database.redis.stream'
+        );
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Console\ConsumeCommand::class,

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## ![1.1.0 (2022-01-11)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.4...1.1.0)
+
+- Remove support for array or object
+- Add transporter strategy
+- Add client proxy
+- Add serializer and deserializer
+- Add stream config
+
 ## ![1.0.4 (2021-12-28)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.3...1.0.4)
 
 - Add support for array

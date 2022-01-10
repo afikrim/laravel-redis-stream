@@ -36,9 +36,9 @@ class DestroyGroupCommand extends Command
         ? $this->argument('group')
         : Str::slug(
             $this->laravel->config->get('app.env')
-            . '_'
+            . '.'
             . $this->laravel->config->get('app.name')
-            . '_group'
-            , '_');
+            . '.group'
+            , '.');
     }
 }

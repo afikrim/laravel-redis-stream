@@ -2,17 +2,12 @@
 
 namespace Afikrim\LaravelRedisStream\Console;
 
-use Afikrim\LaravelRedisStream\Data\Options;
-use Afikrim\LaravelRedisStream\Data\XGROUPOptions;
-use Afikrim\LaravelRedisStream\RedisStream;
+use Afikrim\LaravelRedisStream\TransporterServer;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class ConsumeCommand extends Command
 {
     protected $signature = 'stream:consume
-                            {key* : Specified stream key}
                             {--group= : Specified stream group}
                             {--consumer= : Specified stream group}
                             {--mkstream=false : Make stream of the group}
@@ -24,102 +19,40 @@ class ConsumeCommand extends Command
 
     public function handle()
     {
-        if (!$this->hasArgument('key')) {
-            return 1;
-        }
-
-        foreach ($this->argument('key') as $key) {
-            try {
-                // create consumer group
-                RedisStream::xgroup(
-                    XGROUPOptions::OPTION_CREATE,
-                    $key,
-                    $this->getGroup(),
-                    $this->option('mkstream'),
-                    [
-                        '$',
-                    ]
-                );
-            } catch (\Exception$e) {
-                // do nothing
-            }
-        }
         while (true) {
-            $data = RedisStream::xreadgroup(
-                $this->getGroup(),
-                $this->getConsumer(),
-                $this->argument('key'),
-                collect($this->argument('key'))
-                    ->map(function () {
-                        return '>';
-                    })
-                    ->toArray(),
-                [
-                    Options::OPTION_COUNT,
-                    $this->option('count'),
-                    Options::OPTION_BLOCK,
-                    $this->option('block'),
-                ]
-            );
-            if (count($data) === 0) {
-                if (config('app.env', 'development') === 'testing') {
-                    break;
-                }
-                continue;
-            }
+            $this->listen();
 
-            foreach ($data as $single) {
-                ['key' => $key, 'data' => $data2] = $single;
-
-                foreach ($data2 as $single2) {
-                    try {
-                        $this->processData($key, $single2);
-                    } catch (\Exception$e) {
-                        Log::critical($e->getMessage());
-                    }
-
-                    RedisStream::xack(
-                        $key,
-                        $this->getGroup(),
-                        [$single2['id']]
-                    );
-                }
+            if (config('app.env') === 'testing') {
+                break;
             }
 
             $this->rest();
         }
-
-        return 0;
     }
 
-    protected function processData($key, array $data)
+    protected function listen()
     {
-        // Write your handle here.
-        echo "{$key}\n" . json_encode($data, JSON_PRETTY_PRINT) . "\n";
-    }
+        $options = [];
+        if ($this->hasOption('group')) {
+            $options['group'] = $this->option('group');
+        }
+        if ($this->hasOption('consumer')) {
+            $options['consumer'] = $this->option('consumer');
+        }
+        if ($this->hasOption('count')) {
+            $options['count'] = $this->option('count');
+        }
+        if ($this->hasOption('block')) {
+            $options['block'] = $this->option('block');
+        }
+        if ($this->laravel->config->get('redis.stream.prefix')) {
+            $options['prefix'] = $this->laravel->config->get('redis.stream.prefix');
+        }
 
-    protected function getGroup()
-    {
-        return $this->option('group') && $this->option('group') !== ''
-        ? $this->option('group')
-        : Str::slug(
-            $this->laravel->config->get('app.env')
-            . '_'
-            . $this->laravel->config->get('app.name')
-            . '_group'
-            , '_');
-    }
-
-    protected function getConsumer()
-    {
-        return $this->option('consumer') && $this->option('consumer') !== ''
-        ? $this->option('consumer')
-        : Str::slug(
-            $this->laravel->config->get('app.env')
-            . '_'
-            . $this->laravel->config->get('app.name')
-            . '_consumer'
-            , '_');
+        $server = new TransporterServer($options);
+        $server->addHandler('mystream', function ($result) {return $result;});
+        $server->addHandler('mystream2', function ($result) {return $result;});
+        $server->listen();
     }
 
     private function rest()
