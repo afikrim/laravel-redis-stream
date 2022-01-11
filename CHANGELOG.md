@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## ![1.1.1 (2022-01-12)](https://github.com/afikrim/laravel-redis-stream/compare/1.1.0...1.1.1)
+
+- Add predis to require
+
 ## ![1.1.0 (2022-01-11)](https://github.com/afikrim/laravel-redis-stream/compare/1.0.4...1.1.0)
 
 - Remove support for array or object

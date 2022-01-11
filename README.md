@@ -20,7 +20,7 @@ After you install the package via composer, register a new service provider in `
 $app->register(\Afikrim\LaravelRedisStream\LaravelRedisStreamServiceProvider::class);
 ```
 
-> Note: don't forget to uncomment facades and register redis
+> Note: don't forget to uncomment facades and register redis (please use predis because it can't work in phpredis)
 
 ## Add configuration
 
