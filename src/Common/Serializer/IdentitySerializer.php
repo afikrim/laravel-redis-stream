@@ -20,6 +20,6 @@ class IdentitySerializer
             $this->data = $packet['data'];
         }
 
-        $this->time = now();
+        $this->time = time();
     }
 }
