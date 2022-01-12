@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## ![1.1.3 (2022-01-12)](https://github.com/afikrim/laravel-redis-stream/compare/1.1.2...1.1.3)
+
+- Decode json to array before deserializing
+
 ## ![1.1.2 (2022-01-12)](https://github.com/afikrim/laravel-redis-stream/compare/1.1.1...1.1.2)
 
 - Remove `is_dispossed` from deserializer
