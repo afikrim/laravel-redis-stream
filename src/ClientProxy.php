@@ -88,7 +88,7 @@ class ClientProxy
 
     private function handleReply(array $results)
     {
-        $packets = [];
+        $responses = [];
         foreach ($results as $result) {
             [
                 'data' => $raw_messages,
@@ -100,14 +100,14 @@ class ClientProxy
                     'data' => $packet,
                 ] = $raw_message;
 
-                $packet = (array) (new IdentityDeserializer(json_decode($packet, true), true));
-                $packets[] = $packet;
+                $packet = (array) (new IdentityDeserializer($packet, true));
+                $responses[] = json_decode($packet['response'], true);
 
                 RedisStream::xack($this->getPattern($packet['pattern']), $this->getOption('group'), [$_id]);
             }
         }
 
-        return $packets;
+        return $responses;
     }
 
     private function getPattern(string $pattern)

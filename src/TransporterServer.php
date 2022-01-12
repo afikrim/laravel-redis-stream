@@ -113,7 +113,7 @@ class TransporterServer
                     'id' => $id,
                     'data' => $message,
                     'pattern' => $pattern,
-                ] = (array) (new IdentityDeserializer(json_decode($packet, true)));
+                ] = (array) (new IdentityDeserializer($packet));
                 $message = json_decode($message, true);
 
                 $handler = $this->handlers
