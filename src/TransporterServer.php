@@ -164,7 +164,7 @@ class TransporterServer
 
     private function getOption(string $key)
     {
-        $value = $this->options[$key];
+        $value = array_key_exists($key, $this->options) ? $this->options[$key] : null;
         if (!$value) {
             if ($key === 'count') {
                 return 1;

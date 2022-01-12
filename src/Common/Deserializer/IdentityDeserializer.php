@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Log;
 
 class IdentityDeserializer
 {
-    public $is_dispossed = false;
-
     public function __construct(array $packet, bool $reply = false)
     {
         Log::info("Deserialize >>>>>>>>>>>>>>" . PHP_EOL . json_encode($packet) . PHP_EOL . ">>>>>>>>>>>>>>");
