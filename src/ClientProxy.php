@@ -100,7 +100,7 @@ class ClientProxy
                     'data' => $packet,
                 ] = $raw_message;
 
-                $packet = (array) (new IdentityDeserializer($packet, true));
+                $packet = (array) (new IdentityDeserializer(json_decode($packet, true), true));
                 $packets[] = $packet;
 
                 RedisStream::xack($this->getPattern($packet['pattern']), $this->getOption('group'), [$_id]);
