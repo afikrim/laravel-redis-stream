@@ -25,6 +25,13 @@ class ClientProxy
         return (new static($options));
     }
 
+    /**
+     * Function to send a request that need a reply
+     *
+     * @param string $pattern
+     * @param array $data
+     * @return this
+     */
     public function publish(string $pattern, array $data)
     {
         Log::info('Generating data to publish at pattern: ' . $pattern);
@@ -32,7 +39,7 @@ class ClientProxy
             'data' => json_encode($data),
             'pattern' => $pattern,
         ];
-        $request = (array) (new IdentitySerializer($partial_packet));
+        $request = (array) (new IdentitySerializer($partial_packet, false, true));
 
         Log::info('Sending data to pattern: ' . $pattern);
         $this->id = RedisStream::xadd($this->getPattern($pattern), '*', $request);
@@ -40,6 +47,13 @@ class ClientProxy
         return $this;
     }
 
+    /**
+     * Function to send a forgetable request
+     *
+     * @param string $pattern
+     * @param array $data
+     * @return void
+     */
     public function dispatch(string $pattern, array $data)
     {
         Log::info('Generating data to publish at pattern: ' . $pattern);
@@ -110,11 +124,15 @@ class ClientProxy
         ] = $raw_message;
 
         $packet = (array) (new IdentityDeserializer($packet, true));
-        $response = json_decode($packet['response'], true);
+        $error = $packet['error'] ?? null;
+        $response = $packet['response'] ? json_decode($packet['response'], true) : null;
 
         RedisStream::xack($this->getPattern($packet['pattern']), $this->getOption('group'), [$_id]);
 
-        return $response;
+        return [
+            'error' => $error,
+            'response' => $response
+        ];
     }
 
     private function getPattern(string $pattern)

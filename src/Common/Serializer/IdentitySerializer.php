@@ -7,9 +7,11 @@ use Ramsey\Uuid\Uuid;
 
 class IdentitySerializer
 {
-    public function __construct(array $packet, bool $reply = false)
+    public function __construct(array $packet, bool $reply = false, bool $need_reply = false)
     {
-        Log::info("Serialize >>>>>>>>>>>>>>" . PHP_EOL . json_encode($packet) . PHP_EOL . ">>>>>>>>>>>>>>");
+        Log::info("Serialize >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Log::info(json_encode($packet));
+        Log::info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         $this->id = $packet['id'] ?? Uuid::uuid4();
         $this->pattern = $packet['pattern'];
@@ -18,6 +20,7 @@ class IdentitySerializer
             $this->error = $packet['error'] ?? null;
         } else {
             $this->data = $packet['data'];
+            $this->need_reply = $need_reply;
         }
 
         $this->time = time();

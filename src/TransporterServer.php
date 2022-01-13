@@ -113,8 +113,13 @@ class TransporterServer
                     'id' => $id,
                     'data' => $message,
                     'pattern' => $pattern,
+                    'need_reply' => $need_reply,
                 ] = (array) (new IdentityDeserializer($packet));
                 $message = json_decode($message, true);
+                if (!$need_reply) {
+                    Log::info('Request with pattern: ' . $pattern . ' doesn\'t need any reply. Processing next request...');
+                    continue;
+                }
 
                 $handler = $this->handlers
                     ->where('pattern', $pattern)
@@ -137,11 +142,15 @@ class TransporterServer
                 }
 
                 Log::info('Handling request from pattern: ' . $pattern);
-                $response_data = $handler['handler']($message);
+                [
+                    'data' => $response_data,
+                    'error' => $error,
+                ] = $handler['handler']($message);
                 $response_packet = [
                     'id' => $id,
-                    'response' => json_encode($response_data),
+                    'response' => $response_data ? json_encode($response_data) : null,
                     'pattern' => $pattern,
+                    'error' => $error ?? null
                 ];
                 $response = (array) (new IdentitySerializer($response_packet, true));
 
