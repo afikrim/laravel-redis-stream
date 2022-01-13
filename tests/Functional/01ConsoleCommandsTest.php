@@ -121,7 +121,9 @@ class ConsoleCommandTest extends BaseTestCase
     //         ])
     //         ->subscribe('mystream2', 60);
 
-    //     $this->assertArrayHasKey('response', $results[0], "Array doesn't have 'response' key");
+    //         echo json_encode($results);
+
+    //     // $this->assertArrayHasKey('response', $results, "Array doesn't have 'response' key");
     // }
 
     private function populateStream()

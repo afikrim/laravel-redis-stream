@@ -11,9 +11,9 @@ use Illuminate\Support\Str;
 
 class ClientProxy
 {
+    protected $id;
     protected $options;
     protected $packet;
-    protected $routesMapping;
 
     public function __construct(array $options)
     {
@@ -35,7 +35,7 @@ class ClientProxy
         $request = (array) (new IdentitySerializer($partial_packet));
 
         Log::info('Sending data to pattern: ' . $pattern);
-        RedisStream::xadd($this->getPattern($pattern), '*', $request);
+        $this->id = RedisStream::xadd($this->getPattern($pattern), '*', $request);
 
         return $this;
     }
@@ -53,7 +53,7 @@ class ClientProxy
         RedisStream::xadd($this->getPattern($pattern), '*', $request);
     }
 
-    public function subscribe(string $pattern, int $timeout = 60)
+    public function subscribe(string $pattern)
     {
         try {
             // create consumer group
@@ -79,35 +79,43 @@ class ClientProxy
                 Options::OPTION_COUNT,
                 $this->getOption('count'),
                 Options::OPTION_BLOCK,
-                $this->getOption('block') ?? $timeout * 1000,
+                $this->getOption('block'),
             ],
         );
 
-        return $this->handleReply($results);
+        return $this->handleReply($pattern, $results);
     }
 
-    private function handleReply(array $results)
+    private function handleReply(string $pattern, array $results)
     {
-        $responses = [];
-        foreach ($results as $result) {
-            [
-                'data' => $raw_messages,
-            ] = $result;
-
-            foreach ($raw_messages as $raw_message) {
-                [
-                    'id' => $_id,
-                    'data' => $packet,
-                ] = $raw_message;
-
-                $packet = (array) (new IdentityDeserializer($packet, true));
-                $responses[] = json_decode($packet['response'], true);
-
-                RedisStream::xack($this->getPattern($packet['pattern']), $this->getOption('group'), [$_id]);
-            }
+        echo json_encode($results);
+        if (count($results) === 0) {
+            RedisStream::xdel($pattern, [$this->id]);
+            return [];
         }
 
-        return $responses;
+        [
+            'data' => $raw_messages,
+        ] = $results[0];
+
+        $raw_message_index = array_search($this->id, array_column($raw_messages, 'id'));
+        $raw_message = $raw_messages[$raw_message_index];
+        if (!$raw_message) {
+            RedisStream::xdel($pattern, [$this->id]);
+            return [];
+        }
+
+        [
+            'id' => $_id,
+            'data' => $packet,
+        ] = $raw_message;
+
+        $packet = (array) (new IdentityDeserializer($packet, true));
+        $response = json_decode($packet['response'], true);
+
+        RedisStream::xack($this->getPattern($packet['pattern']), $this->getOption('group'), [$_id]);
+
+        return $response;
     }
 
     private function getPattern(string $pattern)
