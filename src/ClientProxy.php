@@ -88,7 +88,6 @@ class ClientProxy
 
     private function handleReply(string $pattern, array $results)
     {
-        echo json_encode($results);
         if (count($results) === 0) {
             RedisStream::xdel($pattern, [$this->id]);
             return [];
