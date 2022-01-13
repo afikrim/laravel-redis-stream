@@ -16,7 +16,7 @@ class IdentityDeserializer
         $this->pattern = $packet['pattern'];
         if ($reply) {
             $this->response = $packet['response'];
-            $this->error = $packet['error'];
+            $this->error = $packet['error'] === '' ? null : $packet['error'];
         } else {
             $this->data = $packet['data'];
             $this->need_reply = $packet['need_reply'] ?? false;
