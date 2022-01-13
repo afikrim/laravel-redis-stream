@@ -142,15 +142,12 @@ class TransporterServer
                 }
 
                 Log::info('Handling request from pattern: ' . $pattern);
-                [
-                    'data' => $response_data,
-                    'error' => $error,
-                ] = $handler['handler']($message);
+                [$error, $response_data] = $handler['handler']($message);
                 $response_packet = [
                     'id' => $id,
                     'response' => $response_data ? json_encode($response_data) : null,
                     'pattern' => $pattern,
-                    'error' => $error ?? null
+                    'error' => $error,
                 ];
                 $response = (array) (new IdentitySerializer($response_packet, true));
 
