@@ -67,7 +67,7 @@ class ClientProxy
         RedisStream::xadd($this->getPattern($pattern), '*', $request);
     }
 
-    public function subscribe(string $pattern)
+    public function subscribe(string $pattern, int $max_tries = 5, int $attempts = 0)
     {
         try {
             // create consumer group
@@ -97,10 +97,14 @@ class ClientProxy
             ],
         );
 
-        return $this->handleReply($pattern, $results);
+        if ($attempts > $max_tries) {
+            return [];
+        }
+
+        return $this->handleReply($pattern, $results, $max_tries, $attempts);
     }
 
-    private function handleReply(string $pattern, array $results)
+    private function handleReply(string $pattern, array $results, int $max_tries, int $attempts)
     {
         if (count($results) === 0) {
             RedisStream::xdel($pattern, [$this->id]);
@@ -112,16 +116,15 @@ class ClientProxy
         ] = $results[0];
 
         $raw_message_index = array_search($this->id, array_column($raw_messages, 'id'));
-        $raw_message = $raw_messages[$raw_message_index];
-        if (!$raw_message) {
+        if (!is_integer($raw_message_index)) {
             RedisStream::xdel($pattern, [$this->id]);
-            return [];
+            return $this->subscribe($pattern, $max_tries, $attempts + 1);
         }
 
         [
             'id' => $_id,
             'data' => $packet,
-        ] = $raw_message;
+        ] = $raw_messages[$raw_message_index];
 
         $packet = (array) (new IdentityDeserializer($packet, true));
         $error = $packet['error'];
@@ -131,7 +134,7 @@ class ClientProxy
 
         return [
             'error' => $error,
-            'response' => $response
+            'response' => $response,
         ];
     }
 
