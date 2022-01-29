@@ -117,7 +117,10 @@ class ClientProxy
 
         $raw_message_index = array_search($this->id, array_column($raw_messages, 'id'));
         if (!is_integer($raw_message_index)) {
-            RedisStream::xdel($pattern, [$this->id]);
+            if ($attempts === $max_tries) {
+                RedisStream::xdel($pattern, [$this->id]);
+            }
+
             return $this->subscribe($pattern, $max_tries, $attempts + 1);
         }
 
