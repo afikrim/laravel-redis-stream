@@ -111,7 +111,7 @@ class ConsoleCommandTest extends BaseTestCase
     /** Not part of console commands */
     // public function testClient()
     // {
-    //     exec("/usr/bin/php " . __DIR__ . "../../artisan stream:consume --group=mygroup --count=1 --rest=0 --block=0");
+    //     exec("/usr/bin/php " . __DIR__ . "/../../artisan stream:consume --group=mygroup --count=1 --rest=0 --block=0");
     //     $results = ClientProxy::init([
     //         'group' => 'mygroup',
     //     ])
@@ -119,9 +119,7 @@ class ConsoleCommandTest extends BaseTestCase
     //             'name' => 'Aziz',
     //             'email' => "afikrim10@gmail.com",
     //         ])
-    //         ->subscribe('mystream2', 60);
-
-    //         echo json_encode($results);
+    //         ->subscribe('mystream2');
 
     //     // $this->assertArrayHasKey('response', $results, "Array doesn't have 'response' key");
     // }

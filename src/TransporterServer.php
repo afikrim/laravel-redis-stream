@@ -118,6 +118,7 @@ class TransporterServer
                 $message = json_decode($message, true);
                 if (!$need_reply) {
                     Log::info('Request with pattern: ' . $pattern . ' doesn\'t need any reply. Processing next request...');
+                    RedisStream::xack($this->getPattern($pattern), $this->getOption('group'), [$_id]);
                     continue;
                 }
 

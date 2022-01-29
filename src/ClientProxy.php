@@ -133,7 +133,7 @@ class ClientProxy
         $error = $packet['error'];
         $response = $packet['response'] ? json_decode($packet['response'], true) : null;
 
-        RedisStream::xack($this->getPattern($packet['pattern']), $this->getOption('group'), [$_id]);
+        RedisStream::xack($this->getReplyPattern($packet['pattern']), $this->getOption('group'), [$_id]);
 
         return [
             'error' => $error,
