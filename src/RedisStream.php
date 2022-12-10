@@ -66,7 +66,7 @@ class RedisStream
      */
     public static function xread(array $streams, array $ids, array $options): Collection
     {
-        return (new static )->xread($streams, $ids, $options);
+        return (new static )->newXread($streams, $ids, $options);
     }
 
     /**
